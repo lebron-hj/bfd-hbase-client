@@ -1,0 +1,159 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 新 Bootstrap 核心 CSS 文件 -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.min.css">
+
+<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+<link rel="stylesheet"
+	href="http://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<!-- Nav tabs -->
+		<ul class="nav nav-tabs" role="tablist" id="my_page">
+			<li role="presentation" class="active"><a href="#phoenix"
+				role="tab" data-toggle="tab">Phoenix查询</a></li>
+			<li role="presentation"><a href="#hbase"
+				role="tab" data-toggle="tab">HBase查询</a></li>
+			<li role="presentation"><a href="#mysql" role="tab"
+				data-toggle="tab">Mysql查询</a></li>
+		</ul>
+
+		<div class="tab-content">
+			<div role="tabpanel" class="tab-pane active" id="phoenix">
+				<h3>查询语句</h3>
+				<form role="form" id="phoenix_form">
+					<div class="form-group">
+						<label for="query_phoenix_string">SQL语句</label>
+						<textarea class="form-control" rows="3" name="query_string"
+							id="query_phoenix_string"></textarea>
+					</div>
+					
+				</form>
+				
+
+			</div>
+			<div role="tabpanel" class="tab-pane" id="hbase">
+				<h3>查询语句</h3>
+				<form role="form" id="hbase_form">
+					<div class="form-group">
+						<label for="query_hbase_string">SQL语句</label>
+						<textarea class="form-control" rows="3" name="query_string"
+							id="query_hbase_string"></textarea>
+					</div>
+					
+				</form>
+				
+
+			</div>
+			<div role="tabpanel" class="tab-pane" id="mysql">
+			<h3>查询语句</h3>
+				<form role="form" id="mysql_form">
+					<div class="form-group">
+						<label for="query_mysql_string">SQL语句</label>
+						<textarea class="form-control" rows="3" name="query_string"
+							id="query_mysql_string"></textarea>
+					</div>
+					
+				</form></div>
+		</div>
+		<button type="button" class="btn btn-default"
+						id="btn_query">查询</button>
+						<hr>
+		<h3>查询结果</h3>
+		<div id="resu"></div>
+
+
+	</div>
+	<script type="text/javascript">
+		$(function() {
+			function querySQL() {
+			    var form_id = null;
+			    var ajax_url = null;
+			    switch ($("div.tab-content .tab-pane.active").attr("id")) {
+			    case "phoenix":
+			    	form_id = "#phoenix_form";
+			    	ajax_url = "phoenix/query.do";
+			        break;
+			    case "hbase":
+			    	form_id = "#hbase_form";
+			    	ajax_url = "hbase/query.do";
+			        break;
+			    case "mysql":
+			    	form_id = "#mysql_form";
+			    	ajax_url = "mysql/query.do";
+			        break;
+			    default:
+			        alert("无法获取当前激活的选项卡!");
+			        return;
+			    } 
+			    
+				$("#resu").empty();
+				var context=this;
+				$(context).text("正在查询，请稍后...");
+				$(context).attr("disabled", true);
+				
+				var formdata = $(form_id).serialize();
+				var currDate = new Date();
+				$
+						.post(ajax_url, formdata)
+						.done(
+								function(data, textStatus, jqXHR) {
+
+									$("#resu").html(
+											"<p>用时 "
+													+ (new Date() - currDate
+															.getTime())
+													+ " ms</p>")
+									if (data.length <= 0) {
+										return;
+									}
+									$("#resu")
+											.append(
+													'<table class="table table-striped table-condensed"><thead><tr></tr></thead><tbody></tbody></table>');
+									var i;
+									for (i = 0; i < data[0].length; i++) {
+										$("#resu>table>thead>tr").append(
+												"<th>" + data[0][i] + "</th>");
+									}
+									var j;
+									for (j = 1; j < data.length; j++) {
+										$("#resu>table>tbody").append(
+												"<tr></tr>");
+										for (i = 0; i < data[j].length; i++) {
+											$("#resu>table>tbody>tr:last")
+													.append(
+															"<td>" + data[j][i]
+																	+ "</td>");
+										}
+									}
+								}).fail(
+								function(jqXHR, textStatus, errorThrown) {
+									alert("查询出错！" + errorThrown);
+								}).always(function() {
+							$(context).text("查询");
+							$(context).attr("disabled", false);
+						})
+			}
+			$("#btn_query").on("click", querySQL);
+			/* $.ajax({
+				url: "http://10.11.81.10/busrbac/menu/getmenus/user/-1.do",
+				type: "POST",
+				crossDomain: true,
+				dataType: "html"
+			}).done(function() {
+				alert("succ");
+			}); */
+		});
+	</script>
+</body>
+</html>
